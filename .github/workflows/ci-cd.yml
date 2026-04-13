@@ -16,24 +16,45 @@ jobs:
   # ───────────────────────────
   build:
     name: 🔧 Build Stage
-    runs-on: ubuntu-latest     # GitHub gives us a free Linux machine
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: ⬇️ Step 1 - Checkout code
         uses: actions/checkout@v3
-        # Downloads your code onto the GitHub machine
+        # Downloads YOUR code onto GitHub's cloud machine
 
-      - name: Set up Python
+      - name: 🐍 Step 2 - Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-        # Installs Python on the machine
+        # Installs Python on the cloud machine
 
-      - name: Install dependencies
+      - name: 📦 Step 3 - Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+        # Saves packages so next run is FASTER
+        # Like saving downloaded files so you don't re-download
+
+      - name: ⚙️ Step 4 - Upgrade pip
+        run: python -m pip install --upgrade pip
+        # pip is Python's package installer
+        # Always upgrade it first = best practice
+
+      - name: 📥 Step 5 - Install dependencies
+        run: pip install -r requirements.txt
+        # Installs Flask and everything in requirements.txt
+
+      - name: ✅ Step 6 - Verify installation
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        # Installs Flask and other packages from requirements.txt
+          python --version
+          pip list
+          python -c "import flask; print('Flask version:', flask.__version__)"
+        # Confirms everything installed correctly
+        # Like a "sanity check" before moving on
 
   # ───────────────────────────
   # JOB 2: TEST
